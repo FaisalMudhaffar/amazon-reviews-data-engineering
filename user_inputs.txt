@@ -1,0 +1,168 @@
+============================================================
+  USER INPUTS & REFLECTION RESPONSES
+  Project: Amazon Product Reviews — Data Engineering
+  Transformational AI | Udacity PCEP Data Science Program
+============================================================
+
+------------------------------------------------------------
+PART 1 — Environment Setup
+------------------------------------------------------------
+
+Q: What Python version are you using?
+A: Python 3.12.3
+
+Q: What Jupyter Notebook version are you using?
+A: Jupyter Notebook 7.5.6
+
+Q: Why is it important to work in a virtual environment?
+A: A virtual environment isolates project dependencies from
+   system-wide packages, preventing version conflicts and
+   ensuring reproducibility across different machines and
+   collaborators.
+
+------------------------------------------------------------
+PART 2 — Reviews Dataset
+------------------------------------------------------------
+
+Q: How many rows and columns are in the reviews dataset?
+A: 100 rows × 6 columns (limited to 100 samples for
+   performance during exploration of the 22.6 GB dataset).
+
+Q: What columns are present in the reviews dataset?
+A: asin, rating, text, title, user_id, timestamp
+
+Q: What did you observe from reviews_df.head()?
+A: The first few rows show product ASINs, numeric ratings
+   (1.0–5.0), short review text, review titles, anonymous
+   user IDs, and timestamps. Ratings appear to cluster
+   around 4.0–5.0, indicating generally positive reviews
+   in the dataset.
+
+------------------------------------------------------------
+PART 3 — Metadata Dataset
+------------------------------------------------------------
+
+Q: How many rows and columns are in the metadata dataset?
+A: 100 rows × 7 columns (parent_asin, title, price,
+   average_rating, rating_number, main_category, store).
+
+Q: Why do we use try-except when accessing prices/titles?
+A: Large datasets commonly contain missing, null, or
+   non-numeric values. Without try-except, a single bad
+   value would crash the entire program. Exception handling
+   allows the pipeline to continue processing, log warnings,
+   and return None instead of raising an unhandled error.
+
+Q: What does pd.to_numeric(errors='coerce') do?
+A: It converts a column to numeric dtype. Any value that
+   cannot be converted (e.g., "$12.99", "N/A", empty string)
+   is silently replaced with NaN instead of raising an error.
+   This makes downstream filtering (e.g., price.notna())
+   safe and predictable.
+
+------------------------------------------------------------
+PART 4 — Comparing the Datasets
+------------------------------------------------------------
+
+Q: What columns are shared between the two datasets?
+A: The join key is 'asin' (reviews) ↔ 'parent_asin'
+   (metadata). No columns are identically named across
+   both datasets, but these two fields contain the same
+   product identifier values.
+
+Q: What does .info() tell us about the data?
+A: .info() reveals:
+   - Number of non-null entries per column (shows missing %)
+   - Data type (dtype) of each column — important to confirm
+     numeric columns are not stored as object/string
+   - Memory usage of the DataFrame
+   It is faster than .describe() for a structural sanity check.
+
+------------------------------------------------------------
+PART 5 — Data Cleaning & Export
+------------------------------------------------------------
+
+Q: What three filters did you apply to create top_products?
+A: 1. Valid product title: title is not null and not empty
+   2. Review rating >= 4.5
+   3. Price is not null (numeric, non-missing)
+
+Q: What percentage of data was retained after cleaning?
+A: Approximately 34% of merged rows were retained as
+   top_products (34 of 100 merged records).
+   ~66% were removed due to low ratings, missing prices,
+   or invalid titles.
+
+Q: Why export to both CSV and Parquet formats?
+A: CSV is human-readable, universally compatible, and easy
+   to open in Excel or any text editor — ideal for
+   inspection and sharing with non-technical stakeholders.
+   Parquet is a columnar binary format that is compressed,
+   faster to read in big data pipelines (Spark, Dask), and
+   preserves dtypes exactly. The ML team benefits from
+   Parquet in production; analysts may prefer CSV for review.
+
+Q: How did you verify the files were saved correctly?
+A: Used os.path.getsize() to confirm non-zero file sizes
+   and os.path.exists() to confirm both files are present
+   in the working directory. The CSV was 4.3 KB and the
+   Parquet was 7.7 KB (Parquet is larger here due to metadata
+   overhead; at scale it compresses far better than CSV).
+
+------------------------------------------------------------
+PART 6 — Visualization
+------------------------------------------------------------
+
+Q: What did the price histogram reveal?
+A: The price distribution is right-skewed — most top-rated
+   products are priced between $10 and $150, with a long
+   tail of premium products up to ~$300. The mean price
+   (~$130) is higher than the median, confirming the skew.
+   The KDE curve makes this shape immediately visible.
+
+Q: What did the price vs. rating scatterplot show?
+A: There is a very weak correlation between price and
+   rating (Pearson r ≈ 0.0–0.1). High ratings (4.5–5.0)
+   appear at both low and high price points, suggesting
+   that price alone does not drive customer satisfaction
+   for products in this dataset.
+
+Q: Which visualization method was most helpful?
+A: The combined subplot (Part 6.3) was most useful because
+   it presents both the distribution and the correlation
+   in a single figure, making it ideal for business
+   presentations where stakeholders need a concise, at-a-
+   glance summary without switching between multiple charts.
+
+------------------------------------------------------------
+WRAP UP — General Reflection
+------------------------------------------------------------
+
+Q: Which data analysis method was most helpful overall?
+A: The try-except pattern combined with pd.to_numeric
+   (errors='coerce') was the most practically valuable
+   technique. In real big-data environments, a single
+   malformed value in a 22 GB dataset could silently
+   corrupt results or crash a long-running pipeline.
+   This pattern handles it gracefully and makes the
+   code production-ready.
+
+Q: What was the most challenging part of this project?
+A: Understanding when and why to coerce versus raise on
+   invalid data. Deciding to coerce prices to NaN (and
+   later drop them) rather than imputing a value was a
+   deliberate data quality decision — imputing prices
+   for products going to the ML team could introduce
+   bias into model training.
+
+Q: How does this project fit into a portfolio?
+A: This project demonstrates end-to-end data engineering
+   skills: environment setup, big-data streaming, pandas
+   EDA, defensive exception handling, data cleaning with
+   explicit business criteria, multi-format export, and
+   statistical visualization. These are core competencies
+   for a junior data engineer or data analyst role.
+
+============================================================
+  END OF USER INPUTS
+============================================================
